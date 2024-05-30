@@ -5,6 +5,7 @@ import {
   createBlog,
   deleteBlog,
   getAllBlogs,
+  getAllComments,
   getSingleBlog,
 } from "../controllers/blog.js";
 
@@ -18,5 +19,6 @@ blogRouter
   .get(getSingleBlog)
   .delete(isAuth, deleteBlog)
   .post(isAuth, commentOnBlog);
+blogRouter.route('/comments/:id').get(getAllComments);
 
 export { blogRouter };

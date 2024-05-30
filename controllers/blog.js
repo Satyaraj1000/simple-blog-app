@@ -3,6 +3,14 @@ import User from "../models/User.models.js";
 
 const createBlog = async (req, res) => {
   try {
+    const user = await User.findById(req.user._id);
+
+    if (user.role !== "admin") {
+      return res.status(403).json({
+        message: "unauthorized",
+      });
+    }
+
     const { title, description, blog, category, ownername, image } = req.body;
 
     const createdBlog = await Blog.create({
@@ -51,6 +59,14 @@ const getSingleBlog = async (req, res) => {
 
 const deleteBlog = async (req, res) => {
   try {
+    const user = await User.findById(req.user._id);
+
+    if (user.role !== "admin") {
+      return res.status(403).json({
+        message: "unauthorized",
+      });
+    }
+
     const blog = await Blog.findById(req.params.id);
 
     if (blog.owner.toString() !== req.user._id.toString())
@@ -95,4 +111,27 @@ const commentOnBlog = async (req, res) => {
   }
 };
 
-export { createBlog, getAllBlogs, getSingleBlog, deleteBlog, commentOnBlog };
+const getAllComments = async (req, res) => {
+  try {
+    const blog = await Blog.findById(req.params.id);
+
+    const comments = await blog.comments;
+
+    res.json({
+      comments,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+export {
+  createBlog,
+  getAllBlogs,
+  getSingleBlog,
+  deleteBlog,
+  commentOnBlog,
+  getAllComments,
+};
