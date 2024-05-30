@@ -1,4 +1,5 @@
 import Blog from "../models/Blog.models.js";
+import User from "../models/User.models.js";
 
 const createBlog = async (req, res) => {
   try {
@@ -48,4 +49,50 @@ const getSingleBlog = async (req, res) => {
   }
 };
 
-export { createBlog, getAllBlogs, getSingleBlog };
+const deleteBlog = async (req, res) => {
+  try {
+    const blog = await Blog.findById(req.params.id);
+
+    if (blog.owner.toString() !== req.user._id.toString())
+      return res.status(403).json({
+        message: "you are not owner of this blog",
+      });
+
+    await blog.deleteOne();
+
+    res.status(200).json({
+      message: "Blog deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+const commentOnBlog = async (req, res) => {
+  try {
+    const blog = await Blog.findById(req.params.id);
+
+    const user = await User.findById(req.user._id);
+
+    blog.comments.comment = req.body.comment;
+    blog.comments.push({
+      user: user.name,
+      userid: user._id,
+      comment: req.body.comment,
+    });
+
+    await blog.save();
+
+    res.json({
+      message: "Comment Added",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+export { createBlog, getAllBlogs, getSingleBlog, deleteBlog, commentOnBlog };
